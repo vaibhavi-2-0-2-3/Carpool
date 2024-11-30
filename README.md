@@ -146,8 +146,6 @@ The request body should be in JSON format and include the following fields:
 
 ---
 
-# User Profile API Documentation
-
 ## Endpoint: `/user/profile`
 
 ### Description:

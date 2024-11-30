@@ -6,10 +6,18 @@ module.exports.authUser = async (req, res, next) => {
     // Extract token from Authorization header or cookies
     const token =
       req.cookies.token ||
-      (req.headers.authorization && req.headers.authorization.split(" ")[1]);
+      (req.headers.authorization && req.headers.authorization?.split(" ")[1]);
 
     if (!token) {
       return res.status(401).json({ message: "Unauthorized: Token missing" });
+    }
+
+    const isBlaclisted = await userModel.findOne({ token: token });
+
+    if (isBlaclisted) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: Token blacklisted" });
     }
 
     // Verify token
