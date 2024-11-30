@@ -1,28 +1,28 @@
-# Carpool Backend API Documentation
+# Backend API Documentation
 
-## Endpoint: `/users/register`
+## `/users/register` Endpoint
 
-### Description
+### **Description**  
+Registers a new user by creating a user account with the provided information.
 
-The `/users/register` endpoint allows new users to register by providing their personal information. Upon successful registration, a JSON Web Token (JWT) is generated and returned for authentication purposes.
-
-### HTTP Method
-
+### **HTTP Method**  
 `POST`
 
-### Request Body
+### **Request Body**  
+The request body should be in JSON format and include the following fields:
 
-The request body must be in JSON format and include the following fields:
+- **`fullname` (object)**:  
+  - `firstname` (string, required): User's first name (minimum 3 characters).  
+  - `lastname` (string, optional): User's last name (minimum 3 characters).  
+- **`email` (string, required)**: User's email address (must be valid).  
+- **`password` (string, required)**: User's password (minimum 6 characters).  
 
-| Field                | Type   | Required | Description                                                                      |
-| -------------------- | ------ | -------- | -------------------------------------------------------------------------------- |
-| `fullname.firstname` | String | Yes      | The first name of the user (minimum 3 characters).                               |
-| `fullname.lastname`  | String | No       | The last name of the user (minimum 3 characters).                                |
-| `email`              | String | Yes      | The email address of the user (must be a valid email and at least 5 characters). |
-| `password`           | String | Yes      | The password for the user account (minimum 6 characters).                        |
+### **Validation Rules**  
+- `email` must be valid.  
+- `fullname.firstname` must have a minimum length of 3 characters.  
+- `password` must be at least 6 characters.
 
-### Example Request
-
+### **Example Request**  
 ```json
 {
   "fullname": {
@@ -30,41 +30,18 @@ The request body must be in JSON format and include the following fields:
     "lastname": "Doe"
   },
   "email": "john.doe@example.com",
-  "password": "securepassword123"
+  "password": "securePassword123"
 }
+```
 
-## Endpoint: /users/login
-Description
-The /users/login endpoint allows existing users to authenticate by providing their email and password. Upon successful login, a JSON Web Token (JWT) is generated and returned for further authenticated requests.
+### **Example Response**  
 
-### HTTP Method
-### POST
-
-# Request Body
-The request body must be in JSON format and include the following fields:
-
-| Field | Type | Required | Description | |---------|--------|----------|--------------------------------------------------| | email | String | Yes | The email address of the user (must be a valid email and at least 5 characters). | | password | String | Yes | The password for the user account (minimum 6 characters). |
-
-## Example Request
-json
-Insert Code
-Edit
-Copy code
+**201 Created**  
+```json
 {
-  "email": "john.doe@example.com",
-  "password": "securepassword123"
-}
-## Response
-On successful login, the response will contain a JWT and user information.
-
-Successful Response (HTTP Status 200)
-json
-Insert Code
-Edit
-Copy code
-{
-  "token": "your_jwt_token_here",
+  "token": "JWT_Token_String",
   "user": {
+    "_id": "userId123",
     "fullname": {
       "firstname": "John",
       "lastname": "Doe"
@@ -72,39 +49,80 @@ Copy code
     "email": "john.doe@example.com"
   }
 }
-## Error Responses
-Invalid Email or Password (HTTP Status 401)
+```
 
-Response:
-json
-Insert Code
-Edit
-Copy code
+**400 Bad Request**  
+```json
+{
+  "errors": [
+    {
+      "msg": "First name must be at least 3 characters long",
+      "param": "fullname.firstname"
+    }
+  ]
+}
+```
+
+---
+
+## `/users/login` Endpoint
+
+### **Description**  
+Authenticates a user using their email and password, returning a JWT token upon successful login.
+
+### **HTTP Method**  
+`POST`
+
+### **Request Body**  
+The request body should be in JSON format and include the following fields:
+
+- **`email` (string, required)**: User's email address (must be valid).  
+- **`password` (string, required)**: User's password (minimum 6 characters).  
+
+### **Validation Rules**  
+- `email` must be valid.  
+- `password` must be at least 6 characters.
+
+### **Example Request**  
+```json
+{
+  "email": "john.doe@example.com",
+  "password": "securePassword123"
+}
+```
+
+### **Example Response**  
+
+**200 OK**  
+```json
+{
+  "token": "JWT_Token_String",
+  "user": {
+    "_id": "userId123",
+    "fullname": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "john.doe@example.com"
+  }
+}
+```
+
+**401 Unauthorized**  
+```json
 {
   "message": "Invalid email or password"
 }
-## Validation Errors (HTTP Status 400)
+```
 
-If the provided email is not valid or the password is too short:
-json
-Insert Code
-Edit
-Copy code
+**400 Bad Request**  
+```json
 {
   "errors": [
     {
       "msg": "Invalid Email",
-      "param": "email",
-      "location": "body"
-    },
-    {
-      "msg": "Password Invalid",
-      "param": "password",
-      "location": "body"
+      "param": "email"
     }
   ]
 }
-### Notes
-Ensure that the email and password meet the specified criteria for successful authentication.
-The generated JWT should be used for subsequent requests that require authentication.
 ```
