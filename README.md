@@ -250,3 +250,68 @@ If the user corresponding to the decoded token does not exist in the database, a
 - The token is typically stored in a secure cookie or local storage in client applications (like Postman, front-end apps, etc.).
 
 ---
+
+# `/users/logout` Endpoint Documentation
+
+### **Description**  
+Logs out the currently authenticated user by clearing the authentication token and blacklisting it.
+
+---
+
+### **HTTP Method**  
+`GET`
+
+---
+
+### **Authentication**  
+Requires a valid JWT token provided in either:  
+- **Cookies**: `token=<JWT_Token>`  
+- **Authorization Header**: `Authorization: Bearer <JWT_Token>`  
+
+---
+
+### **Example Request**  
+```http
+GET /users/logout
+Authorization: Bearer <JWT_Token>
+```
+
+---
+
+### **Example Response**  
+
+**200 OK**  
+```json
+{
+  "message": "Logged Out"
+}
+```
+
+**401 Unauthorized** (No token provided)  
+```json
+{
+  "message": "Unauthorized: Token missing"
+}
+```
+
+**401 Unauthorized** (Blacklisted token)  
+```json
+{
+  "message": "Unauthorized: Token blacklisted"
+}
+```
+
+**401 Unauthorized** (Invalid/expired token)  
+```json
+{
+  "message": "Invalid or expired token"
+}
+```
+
+---
+
+### **Behavior**  
+- Clears the token from cookies.  
+- Extracts the token from cookies or the `Authorization` header.  
+- Adds the token to the blacklist database to prevent reuse.  
+- Returns a success message upon logout.
