@@ -1,34 +1,28 @@
 const axios = require("axios");
 
-module.exports.getAddressCoordinate = async (address) => {
+// Function to geocode an address
+const getCoordinates = async (address) => {
   const apiKey = process.env.MAPS_API;
   const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
     address
   )}&key=${apiKey}`;
 
-  // console.log(`Request URL: ${url}`); // Log the request URL for debugging
-
   try {
     const response = await axios.get(url);
 
-    // console.log("API Response:", response.data); // Log the full API response for debugging
-
-    if (response.data && response.data.results.length > 0) {
+    if (response.data.results.length > 0) {
       const location = response.data.results[0].geometry;
-      return {
-        ltd: location.lat,
-        lng: location.lng,
-      };
+      return { lat: location.lat, lng: location.lng };
     } else {
-      throw new Error("No coordinates found for the given address");
+      throw new Error(`Unable to fetch coordinates for address: ${address}`);
     }
-  } catch (error) {
-    console.error("Error fetching coordinates:", error.message);
-    throw new Error(
-      "Unable to fetch coordinates. Check the logs for more details."
-    );
+  } catch (err) {
+    console.error("Error fetching coordinates:", err.message);
+    throw err;
   }
 };
+
+module.exports.getCoordinates = getCoordinates;
 
 // Function to calculate the Haversine distance
 const haversineDistance = (coord1, coord2) => {
@@ -49,44 +43,21 @@ const haversineDistance = (coord1, coord2) => {
   return R * c; // Distance in kilometers
 };
 
-// Function to geocode an address using OpenCage
-const geocodeAddress = async (address, apiKey) => {
-  const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
-    address
-  )}&key=${apiKey}`;
-
-  try {
-    const response = await axios.get(url);
-    if (response.data.results.length > 0) {
-      const location = response.data.results[0].geometry;
-      return { lat: location.lat, lng: location.lng };
-    } else {
-      throw new Error(`Unable to fetch coordinates for address: ${address}`);
-    }
-  } catch (err) {
-    console.error("Error in geocoding:", err.message);
-    throw err;
-  }
-};
-
-// Main function to get distance and estimated time
 module.exports.getDistanceTime = async (origin, destination) => {
   if (!origin || !destination) {
     throw new Error("Origin and destination are required");
   }
 
-  const apiKey = process.env.MAPS_API; // Replace with your OpenCage API key in .env
-
   try {
     // Get coordinates for origin and destination
-    const originCoords = await geocodeAddress(origin, apiKey);
-    const destinationCoords = await geocodeAddress(destination, apiKey);
+    const originCoords = await getCoordinates(origin);
+    const destinationCoords = await getCoordinates(destination);
 
     // Calculate distance
     const distance = haversineDistance(originCoords, destinationCoords);
 
     // Estimate travel time (e.g., assume average speed of 60 km/h for cars)
-    const avgSpeedKmH = 60; // You can adjust this based on transport mode
+    const avgSpeedKmH = 60; // Adjust as needed
     const estimatedTimeH = distance / avgSpeedKmH;
     const estimatedTimeMins = Math.round(estimatedTimeH * 60);
 
@@ -96,6 +67,35 @@ module.exports.getDistanceTime = async (origin, destination) => {
     };
   } catch (err) {
     console.error("Error calculating distance and time:", err.message);
+    throw err;
+  }
+};
+
+module.exports.getAutoCompleteSuggestions = async (input) => {
+  if (!input) {
+    throw new Error("Query is required");
+  }
+
+  const apiKey = process.env.MAPS_API; // OpenCage API key from .env
+  const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
+    input
+  )}&key=${apiKey}&limit=5`;
+
+  try {
+    const response = await axios.get(url);
+
+    if (response.data.results.length > 0) {
+      // Map the results to an array of suggestions
+      const suggestions = response.data.results.map((result) => ({
+        formatted: result.formatted, // Full address
+        geometry: result.geometry, // Coordinates
+      }));
+      return suggestions;
+    } else {
+      throw new Error(`No autocomplete suggestions found for query: ${input}`);
+    }
+  } catch (err) {
+    console.error("Error fetching autocomplete suggestions:", err.message);
     throw err;
   }
 };
