@@ -3,14 +3,14 @@
     <!-- Background Image -->
     <div class="image-container">
       <img
-        src="https://images.unsplash.com/photo-1581791797153-3a3d80fa186f?q=80&w=1587&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+        src="https://plus.unsplash.com/premium_photo-1677156768003-0415b8769a75?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
         alt="Traffic"
       />
     </div>
 
     <!-- Content Section -->
     <div class="content-container">
-      <h1>Start Your Carpooling Journey</h1>
+      <h1>Start Your Carpooling Journey Now</h1>
       <button @click="navigateToLogin">Continue</button>
     </div>
   </div>

@@ -1,8 +1,8 @@
 <template>
   <div class="login-page">
     <div class="login-container">
-      <h1>Carpooling</h1>
-      <form>
+      <h1>StreetSmart</h1>
+      <form @submit.prevent="handleLogin">
         <div class="input-group">
           <label for="email">What's your email</label>
           <input
@@ -23,7 +23,7 @@
             required
           />
         </div>
-        <button class="login-button">Login</button>
+        <button class="login-button" type="submit">Login</button>
       </form>
       <div class="signup-link">
         <p>
@@ -48,18 +48,35 @@ import { ref } from "vue";
 export default {
   name: "UserLogin",
   setup() {
+    // Reactive references for two-way binding
     const email = ref("");
     const password = ref("");
+
+    // Handle form submission
+    const handleLogin = () => {
+      if (email.value && password.value) {
+        console.log("Email:", email.value);
+        console.log("Password:", password.value);
+        // Perform login logic here (e.g., API call)
+        // Clear the input fields
+        email.value = "";
+        password.value = "";
+      } else {
+        alert("Please fill out all fields.");
+      }
+    };
 
     return {
       email,
       password,
+      handleLogin,
     };
   },
 };
 </script>
 
 <style scoped>
+/* Styles remain unchanged */
 .login-page {
   display: flex;
   justify-content: center;
@@ -91,7 +108,7 @@ h1 {
 label {
   display: block;
   margin-bottom: 5px;
-  font-weight: 600;
+  font-weight: 550;
   color: #333;
 }
 
@@ -114,6 +131,7 @@ input {
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s;
+  display:block;
 }
 
 .login-button:hover {
@@ -135,13 +153,18 @@ input {
 .captain-button {
   width: 100%;
   padding: 12px;
-  background-color: #28a745;
+  background-color: #449256; 
   color: white;
   border: none;
   border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
   text-decoration: none;
+  display: block;
+}
+
+.captain-button:hover{
+  background-color: #28a745;
 }
 
 @media (max-width: 767px) {
@@ -151,7 +174,7 @@ input {
 
   .login-container {
     width: 100%;
-    margin-top: 5px;
+    margin-top: 0%;
     border-radius: 0;
     box-shadow: none;
   }
