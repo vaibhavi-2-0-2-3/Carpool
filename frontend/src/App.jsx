@@ -1,6 +1,7 @@
 import React, { useContext } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Start from './pages/Start'
+import Riding from './pages/Riding'
 import UserLogin from './pages/UserLogin'
 import UserSignup from './pages/UserSignup'
 import CaptainLogin from './pages/CaptainLogin'
@@ -12,6 +13,8 @@ import Home from './pages/Home'
 import { UserDataContext } from './context/UserContext'
 import UserProtectedWrapper from './pages/UserProtectedWrapper'
 import CaptainProtectWrapper from './pages/CaptainProtectWrapper'
+import CaptainRiding from './pages/CaptainRiding'
+import 'remixicon/fonts/remixicon.css'
 
 const App = () => {
 
@@ -23,6 +26,8 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Start />} />
         <Route path="/login" element={<UserLogin />} />
+        <Route path="/riding" element={<Riding />} />
+        <Route path="/captain-riding" element={<CaptainRiding />} />
         <Route path="/signup" element={<UserSignup />} />
         <Route path="/captain-login" element={<CaptainLogin />} />
         <Route path="/captain-signup" element={<CaptainSignup />} />
@@ -52,6 +57,7 @@ const App = () => {
             </CaptainProtectWrapper>
           }
         />
+
 
       </Routes>
     </div>
