@@ -1,28 +1,31 @@
 const axios = require("axios");
 
-// Function to geocode an address
-const getCoordinates = async (address) => {
+const getAddressCoordinate = async (address) => {
   const apiKey = process.env.MAPS_API;
   const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
     address
   )}&key=${apiKey}`;
 
   try {
+    // console.log("Fetching coordinates for address:", address);
     const response = await axios.get(url);
 
-    if (response.data.results.length > 0) {
+    if (response.data.results && response.data.results.length > 0) {
       const location = response.data.results[0].geometry;
+      // console.log("Coordinates found:", location);
       return { lat: location.lat, lng: location.lng };
     } else {
+      console.error(`No results found for address: ${address}`);
       throw new Error(`Unable to fetch coordinates for address: ${address}`);
     }
   } catch (err) {
-    console.error("Error fetching coordinates:", err.message);
+    console.error("Error fetching coordinates:", err.response?.data || err.message);
     throw err;
   }
 };
 
-module.exports.getCoordinates = getCoordinates;
+module.exports.getAddressCoordinate = getAddressCoordinate;
+
 
 // Function to calculate the Haversine distance
 const haversineDistance = (coord1, coord2) => {
