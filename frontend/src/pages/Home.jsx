@@ -268,7 +268,8 @@ const Home = () => {
         <VehiclePanel
 
           selectVehicle={setVehicleType}
-          fare={fare} setConfirmRidePanel={setConfirmRidePanel} setVehiclePanel={setVehiclePanel} />
+          fare={fare} setConfirmRidePanel={setConfirmRidePanel}
+          setVehiclePanelOpen={setVehiclePanelOpen} />
       </div>
 
       <div ref={confirmRidePanelRef} className='fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-6 pt-12'>
