@@ -53,8 +53,8 @@ module.exports.getDistanceTime = async (origin, destination) => {
 
   try {
     // Get coordinates for origin and destination
-    const originCoords = await getCoordinates(origin);
-    const destinationCoords = await getCoordinates(destination);
+    const originCoords = await getAddressCoordinate(origin);
+    const destinationCoords = await getAddressCoordinate(destination);
 
     // Calculate distance
     const distance = haversineDistance(originCoords, destinationCoords);

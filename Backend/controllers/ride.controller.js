@@ -18,7 +18,7 @@ module.exports.createRide = async (req, res, next) => {
     });
     return res.status(201).json(ride);
   } catch (err) {
-    return res.status(400).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
