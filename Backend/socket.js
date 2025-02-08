@@ -13,39 +13,51 @@ function initializeSocket(server) {
     });
 
     io.on('connection', (socket) => {
-        console.log(`Client connected: ${socket.id}`);
+    console.log(`Client connected: ${socket.id}`);
 
-
-        socket.on('join', async (data) => {
+    socket.on('join', async (data) => {
+        try {
             const { userId, userType } = data;
-
             if (userType === 'user') {
                 await userModel.findByIdAndUpdate(userId, { socketId: socket.id });
             } else if (userType === 'captain') {
                 await captainModel.findByIdAndUpdate(userId, { socketId: socket.id });
             }
-        });
+        } catch (error) {
+            console.error("Error updating socket ID:", error);
+            socket.emit('error', { message: 'Failed to update user socket ID' });
+        }
+    });
 
-
-        socket.on('update-location-captain', async (data) => {
+    socket.on('update-location-captain', async (data) => {
+        try {
             const { userId, location } = data;
 
-            if (!location || !location.ltd || !location.lng) {
+            if (!location || !location.lat || !location.lng) { // Fix ltd -> lat
                 return socket.emit('error', { message: 'Invalid location data' });
             }
 
             await captainModel.findByIdAndUpdate(userId, {
-                location: {
-                    ltd: location.ltd,
-                    lng: location.lng
-                }
+                location: { lat: location.lat, lng: location.lng }
             });
-        });
 
-        socket.on('disconnect', () => {
-            console.log(`Client disconnected: ${socket.id}`);
-        });
+        } catch (error) {
+            console.error("Error updating location:", error);
+            socket.emit('error', { message: 'Failed to update location' });
+        }
     });
+
+    // Handle errors on the socket
+    socket.on('error', (err) => {
+        console.error(`Socket error on ${socket.id}:`, err);
+        socket.destroy(); // Destroy the socket safely
+    });
+
+    socket.on('disconnect', () => {
+        console.log(`Client disconnected: ${socket.id}`);
+    });
+});
+
 }
 
 const sendMessageToSocketId = (socketId, messageObject) => {
