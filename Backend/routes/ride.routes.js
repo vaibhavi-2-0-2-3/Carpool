@@ -55,5 +55,12 @@ router.post('/end-ride',
     rideController.endRide
 )
 
+router.get(
+  "/pending",
+  authMiddleware.authCaptain, // Ensure only captains can access
+  rideController.getAllPendingRides
+);
+
+
 
 module.exports = router;

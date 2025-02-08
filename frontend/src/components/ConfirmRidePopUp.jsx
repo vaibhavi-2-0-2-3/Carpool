@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom'
 
 const ConfirmRidePopUp = (props) => {
 
+  if (!props.ride) return null; // ✅ Prevent rendering if ride is undefined
+
   const [otp, setOtp] = useState('')
   const navigate = useNavigate()
 
@@ -21,6 +23,8 @@ const ConfirmRidePopUp = (props) => {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
     })
+
+    if (!props.ride) return null; // ✅ Prevents rendering if ride is undefined
 
     if (response.status === 200) {
       props.setConfirmRidePopupPanel(false)
