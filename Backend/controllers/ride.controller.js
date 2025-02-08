@@ -4,15 +4,76 @@ const mapService = require('../services/maps.service');
 const { sendMessageToSocketId } = require('../socket');
 const rideModel = require('../models/ride.model');
 
+// module.exports.createRide = async (req, res, next) => {
+//   const errors = validationResult(req);
+//   if (!errors.isEmpty()) {
+//     return res.status(400).json({ errors: errors.array() });
+//   }
+
+//   const { userId, pickup, destination, vehicleType } = req.body;
+
+//   try {
+//     const ride = await rideService.createRide({
+//       user: req.user._id,
+//       pickup,
+//       destination,
+//       vehicleType,
+//     });
+
+//     // Send the response to the client immediately
+//     res.status(201).json(ride);
+
+//     // Perform the background task for captain notifications
+//     (async () => {
+//       try {
+//         // Get the pickup coordinates and captains in the radius
+//         const pickupCoordinates = await mapService.getAddressCoordinate(pickup);
+//         console.log(pickupCoordinates);
+
+//         const captainsInRadius = await mapService.getCaptainsInTheRadius(
+//           pickupCoordinates.lat,
+//           pickupCoordinates.lng,
+//           20
+//         );
+//         console.log(captainsInRadius);
+
+//         ride.otp = ""; // Optional: Clear the OTP
+
+//         const rideWithUser = await rideModel.findOne({ _id: ride._id }).populate('user');
+
+//         // Notify captains
+//         captainsInRadius.map(captain => {
+
+//             sendMessageToSocketId(captain.socketId, {
+//                 event: 'new-ride',
+//                 data: rideWithUser
+//             })
+
+//         });
+
+
+//       } catch (notificationError) {
+//         console.error("Error during notifications:", notificationError);
+//         // Log errors during notification but don't interfere with the client response
+//       }
+//     })();
+//   } catch (err) {
+//     // Catch and handle errors that happen during the ride creation process
+//     return res.status(500).json({ message: err.message });
+//   }
+// };
+
+
 module.exports.createRide = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { userId, pickup, destination, vehicleType } = req.body;
+  const { pickup, destination, vehicleType } = req.body;
 
   try {
+    // 🚀 Save the ride immediately in DB
     const ride = await rideService.createRide({
       user: req.user._id,
       pickup,
@@ -20,48 +81,47 @@ module.exports.createRide = async (req, res, next) => {
       vehicleType,
     });
 
-    // Send the response to the client immediately
+    // ✅ Send response to user after saving in DB
     res.status(201).json(ride);
 
-    // Perform the background task for captain notifications
-    (async () => {
+    // 📌 Run the notification process in the background
+    setImmediate(async () => {
       try {
-        // Get the pickup coordinates and captains in the radius
         const pickupCoordinates = await mapService.getAddressCoordinate(pickup);
-        console.log(pickupCoordinates);
-
         const captainsInRadius = await mapService.getCaptainsInTheRadius(
           pickupCoordinates.lat,
           pickupCoordinates.lng,
           20
         );
-        console.log(captainsInRadius);
 
-        ride.otp = ""; // Optional: Clear the OTP
+        // Retrieve ride with user details
+        const rideWithUser = await rideModel.findById(ride._id).populate("user");
 
-        const rideWithUser = await rideModel.findOne({ _id: ride._id }).populate('user');
-
-        // Notify captains
-        captainsInRadius.map(captain => {
-
-            sendMessageToSocketId(captain.socketId, {
-                event: 'new-ride',
-                data: rideWithUser
-            })
-
+        // 🔔 Notify captains about the new ride request
+        captainsInRadius.forEach((captain) => {
+          sendMessageToSocketId(captain.socketId, {
+            event: "new-ride",
+            data: rideWithUser,
+          });
         });
-
-
-      } catch (notificationError) {
-        console.error("Error during notifications:", notificationError);
-        // Log errors during notification but don't interfere with the client response
+      } catch (error) {
+        console.error("Error during notifications:", error);
       }
-    })();
+    });
   } catch (err) {
-    // Catch and handle errors that happen during the ride creation process
     return res.status(500).json({ message: err.message });
   }
 };
+
+module.exports.getAllPendingRides = async (req, res) => {
+  try {
+    const rides = await rideModel.find({ status: "pending" }).populate("user"); // Get only pending rides
+    res.status(200).json(rides);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching rides", error });
+  }
+};
+
 
 
 module.exports.getFare = async (req, res) => {
